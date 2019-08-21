@@ -29,6 +29,9 @@ struct synthState
   int FILTER_FREQ;
   float FILTER_Q;
   float FILTER_OCTAVE;
+  int GLIDE_TIME;
+  byte CURRENT_NOTE_MONO;
+  byte PREV_NOTE_MONO;
   float MASTER_VOL;
 };
 

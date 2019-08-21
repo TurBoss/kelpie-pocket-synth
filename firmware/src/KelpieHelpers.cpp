@@ -58,38 +58,41 @@ void bufferShift(byte indexToRemove, byte currentIndexPlaying)
 
 void keyBuffMono(byte note, byte velocity, boolean playNote)
 {
-  static byte currentNote = 0;
+  static byte currentNoteIndex = 0;
+
   if (playNote)
   {
-    if (currentNote == MONOBUFFERSIZE) // if we exceed buffer size, newest note goes on end, remove first note and shift all notes down 1
+    if (currentNoteIndex == MONOBUFFERSIZE) // if we exceed buffer size, newest note goes on end, remove first note and shift all notes down 1
     {
-      bufferShift(0, currentNote);
-      currentNote = MONOBUFFERSIZE - 1;
+      bufferShift(0, currentNoteIndex);
+      currentNoteIndex = MONOBUFFERSIZE - 1;
     }
-    monoBuffer[currentNote] = note;
+    monoBuffer[currentNoteIndex] = note;
     playNoteMono(0, note, velocity);
-    currentNote++;
+    currentNoteIndex++;
   }
 
   else if (!playNote) // if key is released
   {
     byte foundNoteIndex = MONOBUFFERSIZE; // default to index larger than buffer size
-    for (byte i = 0; i < (currentNote + 1); i++)
+    for (byte i = 0; i < (currentNoteIndex + 1); i++)
     {
       if (note == monoBuffer[i])
       {
         foundNoteIndex = i;
-        bufferShift(foundNoteIndex, currentNote);
-        currentNote--;
-        playNoteMono(1, monoBuffer[currentNote - 1], velocity);
+        bufferShift(foundNoteIndex, currentNoteIndex);
+        currentNoteIndex--;
+        playNoteMono(1, monoBuffer[currentNoteIndex - 1], velocity);
         break;
       }
     }
-    if (currentNote == 0)
+    if (currentNoteIndex == 0)
     {
       playNoteMono(2, note, velocity);
     }
   }
+  globalState.CURRENT_NOTE_MONO = monoBuffer[currentNoteIndex - 1];
+  Serial.println(globalState.CURRENT_NOTE_MONO);
 }
 
 void keyBuffPoly(byte note, byte velocity, boolean playNote)
@@ -307,7 +310,8 @@ void handleKnobChange(pot knob)
       }
     }
     break;
-  case 9:
+  case 9: // GLIDE TIME
+    globalState.GLIDE_TIME = (1023 - knobValue) * 4;
     break;
   case 10: // FILTER_FREQ
 

@@ -81,6 +81,9 @@ synthState globalState = {
     10000,             // FILTER_FREQ
     1.1,               // FILTER_Q
     1.0,               // FILTER_OCTAVE
+    0,                 // GLIDE_TIME
+    0,                 // CURRENT_NOTE_MONO
+    0,                 // PREV_NOTE_MONO
     0.5                // MASTER_VOL
 };
 
