@@ -26,6 +26,7 @@ extern byte monoBuffer[];
 void activateVoices(byte index, byte note, float frequency, float gain);
 void decactivateVoices(byte index);
 void playNoteMono(byte playMode, byte note, byte velocity);
+float glideNotes(byte newNote, byte prevNote);
 void bufferShift(byte indexToRemove, byte currentIndexPlaying);
 void keyBuffMono(byte note, byte velocity, boolean isNoteOn);
 void keyBuffPoly(byte note, byte velocty, boolean playNote);

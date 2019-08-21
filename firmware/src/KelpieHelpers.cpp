@@ -18,25 +18,33 @@ void deactivateVoices(byte index)
   polyVoices[index].note = 0;
 }
 
+float glideNotes(byte newNote, byte prevNote)
+{
+  float newFreq = noteFreqs[newNote];
+  float prevFreq = noteFreqs[prevNote];
+
+  return newFreq - prevFreq;
+}
+
 void playNoteMono(byte playMode, byte note, byte velocity)
 {
-  float baseNoteFreq = noteFreqs[note];
+  globalState.MONO_BASE_NOTE_FREQ = noteFreqs[note];
   float noteGain = float(velocity) * DIV127;
   switch (playMode) // WILL SWITCH TO ENUMS LATER
   {
   case 0: // PLAYNOTE
     for (byte i = 0; i < numPolyVoices; i++)
     {
-      activateVoices(i, note, baseNoteFreq, noteGain);
+      activateVoices(i, note, globalState.MONO_BASE_NOTE_FREQ, noteGain);
     }
     break;
   case 1: // UPDATE NOTE
     for (byte i = 0; i < numPolyVoices; i++)
     {
       polyVoices[i].note = note;
-      polyVoices[i].noteFreq = baseNoteFreq;
-      polyVoices[i].waveformA.frequency(baseNoteFreq * globalState.PITCH_BEND);
-      polyVoices[i].waveformB.frequency(baseNoteFreq * globalState.PITCH_BEND * globalState.DETUNE);
+      polyVoices[i].noteFreq = globalState.MONO_BASE_NOTE_FREQ;
+      polyVoices[i].waveformA.frequency(globalState.MONO_BASE_NOTE_FREQ * globalState.PITCH_BEND);
+      polyVoices[i].waveformB.frequency(globalState.MONO_BASE_NOTE_FREQ * globalState.PITCH_BEND * globalState.DETUNE);
     }
     break;
   case 2: // STOP NOTE
@@ -62,18 +70,29 @@ void keyBuffMono(byte note, byte velocity, boolean playNote)
 
   if (playNote)
   {
+    globalState.CURRENT_NOTE_MONO = note;   // this is for glide purposes
     if (currentNoteIndex == MONOBUFFERSIZE) // if we exceed buffer size, newest note goes on end, remove first note and shift all notes down 1
     {
       bufferShift(0, currentNoteIndex);
       currentNoteIndex = MONOBUFFERSIZE - 1;
     }
-    monoBuffer[currentNoteIndex] = note;
-    playNoteMono(0, note, velocity);
+    monoBuffer[currentNoteIndex] = globalState.CURRENT_NOTE_MONO;
+    playNoteMono(0, globalState.CURRENT_NOTE_MONO, velocity);
+    if (currentNoteIndex == 0)
+    {
+      globalState.PREV_NOTE_MONO = 0;
+    }
+    else
+    {
+      globalState.PREV_NOTE_MONO = monoBuffer[currentNoteIndex - 1];
+    }
     currentNoteIndex++;
   }
 
   else if (!playNote) // if key is released
   {
+    globalState.PREV_NOTE_MONO = globalState.CURRENT_NOTE_MONO;
+
     byte foundNoteIndex = MONOBUFFERSIZE; // default to index larger than buffer size
     for (byte i = 0; i < (currentNoteIndex + 1); i++)
     {
@@ -82,16 +101,19 @@ void keyBuffMono(byte note, byte velocity, boolean playNote)
         foundNoteIndex = i;
         bufferShift(foundNoteIndex, currentNoteIndex);
         currentNoteIndex--;
-        playNoteMono(1, monoBuffer[currentNoteIndex - 1], velocity);
+        globalState.CURRENT_NOTE_MONO = monoBuffer[currentNoteIndex - 1];
+        playNoteMono(1, globalState.CURRENT_NOTE_MONO, velocity);
         break;
       }
     }
     if (currentNoteIndex == 0)
     {
-      playNoteMono(2, note, velocity);
+      playNoteMono(2, globalState.CURRENT_NOTE_MONO, velocity);
     }
   }
-  globalState.CURRENT_NOTE_MONO = monoBuffer[currentNoteIndex - 1];
+
+  Serial.print(globalState.PREV_NOTE_MONO);
+  Serial.print(" ");
   Serial.println(globalState.CURRENT_NOTE_MONO);
 }
 

@@ -32,6 +32,7 @@ struct synthState
   int GLIDE_TIME;
   byte CURRENT_NOTE_MONO;
   byte PREV_NOTE_MONO;
+  float MONO_BASE_NOTE_FREQ;
   float MASTER_VOL;
 };
 

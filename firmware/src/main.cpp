@@ -84,6 +84,7 @@ synthState globalState = {
     0,                 // GLIDE_TIME
     0,                 // CURRENT_NOTE_MONO
     0,                 // PREV_NOTE_MONO
+    0.0,               // MONO_BASE_NOTE_FREQ
     0.5                // MASTER_VOL
 };
 
@@ -227,5 +228,11 @@ void loop()
   {
     buttonsState = kelpie.getButtons();
     handleButtonPress(buttonsState);
+  }
+
+  // THIS WILL CALCULATE THE NEW FREQUENCY OF THE OSCILLATORS WHEN GLIDING
+  if (globalState.isPoly == false)
+  {
+    Serial.println(glideNotes(globalState.CURRENT_NOTE_MONO, globalState.PREV_NOTE_MONO));
   }
 }
