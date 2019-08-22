@@ -23,7 +23,7 @@ extern AudioMixer4 LFO_MIXER_AMP;
 extern const byte MONOBUFFERSIZE;
 extern byte monoBuffer[];
 
-void activateVoices(byte index, byte note, float frequency, float gain);
+void activateVoice(byte index, byte note, float frequency, float gain);
 void decactivateVoices(byte index);
 void playNoteMono(byte playMode, byte note, byte velocity);
 float glideNotes(byte newNote, byte prevNote);

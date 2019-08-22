@@ -1,6 +1,6 @@
 #include <KelpieHelpers.h>
 
-void activateVoices(byte index, byte note, float frequency, float gain)
+void activateVoice(byte index, byte note, float frequency, float gain)
 {
   polyVoices[index].note = note;
   polyVoices[index].noteFreq = frequency;
@@ -11,7 +11,7 @@ void activateVoices(byte index, byte note, float frequency, float gain)
   polyVoices[index].filterEnv.noteOn();
 }
 
-void deactivateVoices(byte index)
+void deactivateVoice(byte index)
 {
   polyVoices[index].ampEnv.noteOff();
   polyVoices[index].filterEnv.noteOff();
@@ -35,7 +35,7 @@ void playNoteMono(byte playMode, byte note, byte velocity)
   case 0: // PLAYNOTE
     for (byte i = 0; i < numPolyVoices; i++)
     {
-      activateVoices(i, note, globalState.MONO_BASE_NOTE_FREQ, noteGain);
+      activateVoice(i, note, globalState.MONO_BASE_NOTE_FREQ, noteGain);
     }
     break;
   case 1: // UPDATE NOTE
@@ -50,7 +50,7 @@ void playNoteMono(byte playMode, byte note, byte velocity)
   case 2: // STOP NOTE
     for (byte i = 0; i < numPolyVoices; i++)
     {
-      deactivateVoices(i);
+      deactivateVoice(i);
     }
     break;
   }
@@ -127,7 +127,7 @@ void keyBuffPoly(byte note, byte velocity, boolean playNote)
     {
       if (polyVoices[i].ampEnv.isActive() == false)
       {
-        activateVoices(i, note, baseNoteFreq, noteGain);
+        activateVoice(i, note, baseNoteFreq, noteGain);
         break;
       }
     }
@@ -138,7 +138,7 @@ void keyBuffPoly(byte note, byte velocity, boolean playNote)
     {
       if (polyVoices[i].note == note)
       {
-        deactivateVoices(i);
+        deactivateVoice(i);
       }
     }
   }
@@ -185,7 +185,11 @@ void handleButtonPress(boolean *buttonsState)
         }
         break;
 
-      case 2:
+      case 2: // change synth mode and also clear all voices before doing so
+        for (byte i = 0; i < numPolyVoices; i++)
+        {
+          deactivateVoice(i);
+        }
         if (buttonState == true)
         {
           globalState.isPoly = true;
