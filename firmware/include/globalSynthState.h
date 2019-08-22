@@ -34,6 +34,7 @@ struct synthState
   byte PREV_NOTE_MONO;
   float MONO_BASE_NOTE_FREQ;
   float MASTER_VOL;
+  float MASTER_VOL_COMPENSATION;
 };
 
 #endif

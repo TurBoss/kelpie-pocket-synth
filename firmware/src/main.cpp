@@ -24,8 +24,6 @@ boolean prevButtonsState[4] = {false, false, false, false}; // initial state on 
 boolean *buttonsState;
 pot changedKnob;
 
-
-
 polyVoice VOICE_1 = {0, 0.0, 0, false, V1_A, V1_B, V1_N, V1_MIX, V1_AMP, V1_ENV, V1_FILT_ENV, V1_FILT};
 polyVoice VOICE_2 = {0, 0.0, 0, false, V2_A, V2_B, V2_N, V2_MIX, V2_AMP, V2_ENV, V2_FILT_ENV, V2_FILT};
 polyVoice VOICE_3 = {0, 0.0, 0, false, V3_A, V3_B, V3_N, V3_MIX, V3_AMP, V3_ENV, V3_FILT_ENV, V3_FILT};
@@ -34,10 +32,10 @@ polyVoice VOICE_5 = {0, 0.0, 0, false, V5_A, V5_B, V5_N, V5_MIX, V5_AMP, V5_ENV,
 polyVoice VOICE_6 = {0, 0.0, 0, false, V6_A, V6_B, V6_N, V6_MIX, V6_AMP, V6_ENV, V6_FILT_ENV, V6_FILT};
 polyVoice VOICE_7 = {0, 0.0, 0, false, V7_A, V7_B, V7_N, V7_MIX, V7_AMP, V7_ENV, V7_FILT_ENV, V7_FILT};
 polyVoice VOICE_8 = {0, 0.0, 0, false, V8_A, V8_B, V8_N, V8_MIX, V8_AMP, V8_ENV, V8_FILT_ENV, V8_FILT};
-polyVoice VOICE_9 = {0, 0.0, 0, false, V9_A, V9_B, V9_N, V9_MIX, V9_AMP, V9_ENV, V9_FILT_ENV, V9_FILT};
-polyVoice VOICE_10 = {0, 0.0, 0, false, V10_A, V10_B, V10_N, V10_MIX, V10_AMP, V10_ENV, V10_FILT_ENV, V10_FILT};
-polyVoice VOICE_11 = {0, 0.0, 0, false, V11_A, V11_B, V11_N, V11_MIX, V11_AMP, V11_ENV, V11_FILT_ENV, V11_FILT};
-polyVoice VOICE_12 = {0, 0.0, 0, false, V12_A, V12_B, V12_N, V12_MIX, V12_AMP, V12_ENV, V12_FILT_ENV, V12_FILT};
+// polyVoice VOICE_9 = {0, 0.0, 0, false, V9_A, V9_B, V9_N, V9_MIX, V9_AMP, V9_ENV, V9_FILT_ENV, V9_FILT};
+// polyVoice VOICE_10 = {0, 0.0, 0, false, V10_A, V10_B, V10_N, V10_MIX, V10_AMP, V10_ENV, V10_FILT_ENV, V10_FILT};
+// polyVoice VOICE_11 = {0, 0.0, 0, false, V11_A, V11_B, V11_N, V11_MIX, V11_AMP, V11_ENV, V11_FILT_ENV, V11_FILT};
+// polyVoice VOICE_12 = {0, 0.0, 0, false, V12_A, V12_B, V12_N, V12_MIX, V12_AMP, V12_ENV, V12_FILT_ENV, V12_FILT};
 
 const byte numPolyVoices = 8; // 12 voices have been causing issues, so running 6 for now
 polyVoice polyVoices[numPolyVoices] = {
@@ -48,20 +46,16 @@ polyVoice polyVoices[numPolyVoices] = {
     VOICE_5,
     VOICE_6,
     VOICE_7,
-    VOICE_8
-    // VOICE_9,
-    // VOICE_10,
-    // VOICE_11,
-    // VOICE_12
-};
+    VOICE_8};
 
 const byte MONOBUFFERSIZE = 8;
 byte monoBuffer[MONOBUFFERSIZE];
+byte currentNoteIndex = 0;
 
 synthState globalState = {
     WAVEFORM_SAWTOOTH, // WAVEFORM1
     WAVEFORM_SAWTOOTH, // WAVEFORM2
-    false,             // isPoly
+    true,              // isPoly
     false,             // shift
     1.0,               // OSC1_VOL
     1.0,               // OSC2_VOL
@@ -87,7 +81,8 @@ synthState globalState = {
     0,                 // CURRENT_NOTE_MONO
     0,                 // PREV_NOTE_MONO
     0.0,               // MONO_BASE_NOTE_FREQ
-    0.5                // MASTER_VOL
+    0.5,               // MASTER_VOL
+    1.0                // MASTER_VOL_COMPENSATION
 };
 
 void handleMidiEvent(byte channelByte, byte controlByte, byte valueByte)
@@ -196,7 +191,7 @@ void setup()
   {
     V14_MIX.gain(0, 0.25);
     V58_MIX.gain(0, 0.25);
-    V912_MIX.gain(0, 0.25);
+    // V912_MIX.gain(0, 0.25);
   }
 
   ALL_VOICE_MIX.gain(0, 0.5);

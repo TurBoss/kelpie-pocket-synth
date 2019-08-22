@@ -66,8 +66,6 @@ void bufferShift(byte indexToRemove, byte currentIndexPlaying)
 
 void keyBuffMono(byte note, byte velocity, boolean playNote)
 {
-  static byte currentNoteIndex = 0;
-
   if (playNote)
   {
     globalState.CURRENT_NOTE_MONO = note;   // this is for glide purposes
@@ -112,9 +110,9 @@ void keyBuffMono(byte note, byte velocity, boolean playNote)
     }
   }
 
-  Serial.print(globalState.PREV_NOTE_MONO);
-  Serial.print(" ");
-  Serial.println(globalState.CURRENT_NOTE_MONO);
+  // Serial.print(globalState.PREV_NOTE_MONO);
+  // Serial.print(" ");
+  // Serial.println(globalState.CURRENT_NOTE_MONO);
 }
 
 void keyBuffPoly(byte note, byte velocity, boolean playNote)
@@ -186,18 +184,26 @@ void handleButtonPress(boolean *buttonsState)
         break;
 
       case 2: // change synth mode and also clear all voices before doing so
+        currentNoteIndex = 0;
         for (byte i = 0; i < numPolyVoices; i++)
         {
-          deactivateVoice(i);
+          if (i < MONOBUFFERSIZE) // clear the mono buffer
+          {
+            monoBuffer[i] = 255;
+          }
+          deactivateVoice(i); // deactivate the voices
         }
-        if (buttonState == true)
+        if (buttonState == true) // change to mono
         {
-          globalState.isPoly = true;
-        }
-        else
-        {
+          globalState.MASTER_VOL_COMPENSATION = 0.15; // naive way of compensating for gain differences
           globalState.isPoly = false;
         }
+        else // change to poly
+        {
+          globalState.MASTER_VOL_COMPENSATION = 1.0;
+          globalState.isPoly = true;
+        }
+        amp1.gain(globalState.MASTER_VOL * globalState.MASTER_VOL_COMPENSATION);
         break;
 
       case 3:
@@ -286,7 +292,7 @@ void handleKnobChange(pot knob)
     break;
   case 4: // MASTER_VOL
     globalState.MASTER_VOL = 2 * (1 - decKnobVal);
-    amp1.gain(globalState.MASTER_VOL);
+    amp1.gain(globalState.MASTER_VOL * globalState.MASTER_VOL_COMPENSATION);
     break;
   case 5: // NOISE_PRESENSE
     globalState.NOISE_VOL = 1 - decKnobVal;

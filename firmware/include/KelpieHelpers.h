@@ -22,6 +22,7 @@ extern AudioSynthWaveformSine LFO;
 extern AudioMixer4 LFO_MIXER_AMP;
 extern const byte MONOBUFFERSIZE;
 extern byte monoBuffer[];
+extern byte currentNoteIndex;
 
 void activateVoice(byte index, byte note, float frequency, float gain);
 void decactivateVoices(byte index);
