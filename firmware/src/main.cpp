@@ -142,7 +142,14 @@ void handleMidiEvent(byte channelByte, byte controlByte, byte valueByte)
 
 
 void usbControlChange(byte channel, byte control, byte value){
+  pot data;
 
+  data.didChange = true;
+  
+  data.name = control;
+  data.value = value;
+
+  handleKnobChange(data);
 }
 void usbNoteOn(byte channel, byte note, byte velocity){
   if (note > 23 && note < 108)
@@ -247,7 +254,7 @@ void setup()
 void loop()
 {
   usbMIDI.read();         // All Channels
-  
+
   if (MIDI.read())
   {
     byte channel = MIDI.getChannel();
