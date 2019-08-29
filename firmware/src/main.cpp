@@ -140,8 +140,48 @@ void handleMidiEvent(byte channelByte, byte controlByte, byte valueByte)
   }
 }
 
+
+void usbControlChange(byte channel, byte control, byte value){
+
+}
+void usbNoteOn(byte channel, byte note, byte velocity){
+  if (note > 23 && note < 108)
+  {
+    if (globalState.isPoly == true) // depending on mode send to buffer
+    {
+      keyBuffPoly(note, velocity, true);
+    }
+    else
+    {
+      keyBuffMono(note, velocity, true);
+    }
+  }
+}
+void usbNoteOff(byte channel, byte note, byte velocity){
+  if (note > 23 && note < 108)
+  {
+    if (globalState.isPoly == true) // depending on mode send to buffer
+    {
+      keyBuffPoly(note, velocity, false);
+    }
+    else
+    {
+      keyBuffMono(note, velocity, false);
+    }
+  }
+}
+
+void usbPitchChange(byte channel, int pitch){
+
+}
+
 void setup()
 {
+  usbMIDI.setHandleControlChange(usbControlChange);
+  usbMIDI.setHandleNoteOff(usbNoteOff);
+  usbMIDI.setHandleNoteOn(usbNoteOn);
+  usbMIDI.setHandlePitchChange(usbPitchChange);
+
   MIDI.begin();
   AudioMemory(80);
   sgtl5000_1.enable();
@@ -206,6 +246,8 @@ void setup()
 
 void loop()
 {
+  usbMIDI.read();         // All Channels
+  
   if (MIDI.read())
   {
     byte channel = MIDI.getChannel();
